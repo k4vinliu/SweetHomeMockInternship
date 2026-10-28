@@ -779,6 +779,35 @@ public class FurnitureTable extends JTable implements View, Printable {
       printableColumn.setHeaderRenderer(printableHeaderRenderer);
       printableColumnModel.addColumn(printableColumn);
     }    
+    // Printed furniture belongs to every viewable level, so add a Level column 
+    // to distinguish rows if the home has levels and that column isn't displayed 
+    if (((FurnitureTreeTableModel)getModel()).home.getLevels().size() > 1
+        && columnModel instanceof FurnitureTableColumnModel) {
+      boolean levelColumnPrinted = false;
+      for (int columnIndex = 0, n = printableColumnModel.getColumnCount(); columnIndex < n; columnIndex++) {
+        levelColumnPrinted |= printableColumnModel.getColumn(columnIndex).getIdentifier() 
+            == HomePieceOfFurniture.SortableProperty.LEVEL;
+      }
+      if (!levelColumnPrinted) {
+        final TableColumn levelColumn = ((FurnitureTableColumnModel)columnModel).availableColumns.get(
+            HomePieceOfFurniture.SortableProperty.LEVEL);
+        TableColumn printableColumn = new TableColumn();
+        printableColumn.setIdentifier(levelColumn.getIdentifier());
+        printableColumn.setHeaderValue(levelColumn.getHeaderValue());
+        printableColumn.setCellRenderer(new TableCellRenderer() {
+            public Component getTableCellRendererComponent(JTable table, Object value, 
+                                   boolean isSelected, boolean hasFocus, int row, int column) {
+              Component rendererComponent = levelColumn.getCellRenderer().getTableCellRendererComponent(
+                  table, value, isSelected, hasFocus, row, column);
+              rendererComponent.setBackground(Color.WHITE);
+              rendererComponent.setForeground(Color.BLACK);
+              return rendererComponent;
+            }
+          });
+        printableColumn.setHeaderRenderer(printableHeaderRenderer);
+        printableColumnModel.addColumn(printableColumn);
+      }
+    }
     return print(g, pageFormat, pageIndex, printableColumnModel, Color.BLACK);
   }
 
